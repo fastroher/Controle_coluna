@@ -16,12 +16,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDial, QGraphicsView, QGridLayout,
-    QHBoxLayout, QHeaderView, QLCDNumber, QLabel,
-    QLayout, QMainWindow, QPushButton, QSizePolicy,
-    QTableWidget, QTableWidgetItem, QToolBox, QVBoxLayout,
-    QWidget)
+    QHBoxLayout, QLCDNumber, QLabel, QLayout,
+    QMainWindow, QPushButton, QSizePolicy, QToolBox,
+    QVBoxLayout, QWidget)
 import Imagens_rc
-import sys
 
 class Ui_Superv_geral(object):
     def setupUi(self, Superv_geral):
@@ -51,12 +49,6 @@ class Ui_Superv_geral(object):
         self.graph_T.setStyleSheet(u"background-color: white;")
 
         self.layout_graph.addWidget(self.graph_T)
-
-        self.table_T = QTableWidget(self.layout_principal)
-        self.table_T.setObjectName(u"table_T")
-        self.table_T.setStyleSheet(u"background-color: white;")
-
-        self.layout_graph.addWidget(self.table_T)
 
 
         self.horizontalLayout_5.addLayout(self.layout_graph)
@@ -208,7 +200,7 @@ class Ui_Superv_geral(object):
         self.toolBox.addItem(self.layout_tool_manual, u"Controle Manual")
         self.layout_tool_auto = QWidget()
         self.layout_tool_auto.setObjectName(u"layout_tool_auto")
-        self.layout_tool_auto.setGeometry(QRect(0, 0, 142, 85))
+        self.layout_tool_auto.setGeometry(QRect(0, 0, 115, 50))
         self.horizontalLayout = QHBoxLayout(self.layout_tool_auto)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.pushButton_3 = QPushButton(self.layout_tool_auto)
@@ -353,22 +345,5 @@ class Ui_Superv_geral(object):
         self.label_xB.setText(QCoreApplication.translate("Superv_geral", u"xB", None))
         self.label_MD.setText(QCoreApplication.translate("Superv_geral", u"MD", None))
         self.label_MB.setText(QCoreApplication.translate("Superv_geral", u"MB", None))
+    # retranslateUi
 
-class SupervisaoGeralApp:
-    def __init__(self):
-        # Inicializa a aplicação Qt
-        self.app = QApplication.instance() or QApplication(sys.argv)
-        # Cria a janela principal
-        self.window = QMainWindow()
-        # Cria a instância da UI
-        self.ui = Ui_Superv_geral()
-        # Configura a UI na janela
-        self.ui.setupUi(self.window)
-    
-    def show(self):
-        """Mostra a janela"""
-        self.window.show()
-        return self.app.exec()
-    
-    def get_ui_instance(self):
-          return self.ui

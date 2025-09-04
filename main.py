@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QLCDNumber, QDial, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QLCDNumber, QDial, QVBoxLayout, QWidget, QGraphicsSimpleTextItem
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor, QPainter
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
@@ -24,17 +24,11 @@ class SupervisaoGeralApp(QMainWindow):
         self.dial_ctr_VL = self.ui.dial_ctr_VL
         self.dial_ctr_VD = self.ui.dial_ctr_VD
         self.dial_RB = self.ui.dial_RB
-        self.table_T = self.ui.table_T
         
         # Substituir QGraphicsView por QChartView para os gráficos
         self.setup_graficos()
         
-        # Configurar a tabela de temperaturas
-        self.setup_tabela_temperaturas()
-        
         # Dados históricos para os gráficos
-        self.historico_xD = []
-        self.historico_temperaturas = [[] for _ in range(14)]
         self.tempo = 0
         
     def setup_graficos(self):
@@ -68,25 +62,6 @@ class SupervisaoGeralApp(QMainWindow):
         # Configurar os gráficos
         self.setup_grafico_temperaturas()
         self.setup_grafico_xD()
-    
-    def setup_tabela_temperaturas(self):
-        """Configura a tabela de temperaturas dos pratos"""
-        self.table_T.setColumnCount(2)
-        self.table_T.setHorizontalHeaderLabels(["Prato", "Temperatura (°C)"])
-        self.table_T.setRowCount(14)
-        
-        for i in range(14):
-            # Adicionar número do prato
-            item_prato = QTableWidgetItem(f"Prato {i+1}")
-            item_prato.setTextAlignment(Qt.AlignCenter)
-            self.table_T.setItem(i, 0, item_prato)
-            
-            # Adicionar valor de temperatura (inicial 0)
-            item_temp = QTableWidgetItem("0.00")
-            item_temp.setTextAlignment(Qt.AlignCenter)
-            self.table_T.setItem(i, 1, item_temp)
-        
-        self.table_T.resizeColumnsToContents()
     
     def setup_grafico_temperaturas(self):
         """Configura o gráfico de temperaturas dos pratos"""
@@ -161,37 +136,52 @@ class SupervisaoGeralApp(QMainWindow):
         # Configurar o chart view
         self.chart_view_xD.setChart(self.chart_xD)
     
-    def atualizar_tabela_temperaturas(self, temperaturas):
-        """Atualiza a tabela con as temperaturas dos pratos"""
-        for i, temp in enumerate(temperaturas):
-            item = self.table_T.item(i, 1)
-            if item:
-                item.setText(f"{temp:.2f}")
-    
     def atualizar_grafico_temperaturas(self, temperaturas):
-        """Atualiza o gráfico de temperaturas"""
+        """Atualiza o gráfico de temperaturas e insere rótulo do último valor"""
         self.tempo += 1
-        
+
         # Manter apenas os últimos 100 pontos
         if self.tempo > 100:
             for series in self.series_T:
                 if series.count() > 0:
                     series.removePoints(0, 1)
             self.axis_x_T.setRange(self.tempo - 100, self.tempo)
-        
+
         # Adicionar novos pontos
         for i, temp in enumerate(temperaturas):
             self.series_T[i].append(self.tempo, temp)
-    
+
+            # Remover rótulo anterior, se existir
+            if hasattr(self, f'label_T_{i}'):
+                self.chart_T.scene().removeItem(getattr(self, f'label_T_{i}'))
+
+            # Adicionar rótulo do último valor
+            label = QGraphicsSimpleTextItem(f"{temp:.2f}")
+            pos = self.chart_T.mapToPosition(self.series_T[i].pointsVector()[-1], self.series_T[i])
+            label.setPos(pos.x(), pos.y() - 20)  # Ajuste vertical
+            self.chart_T.scene().addItem(label)
+            setattr(self, f'label_T_{i}', label)
+
     def atualizar_grafico_xD(self, xD):
-        """Atualiza o gráfico da composição xD"""
+        """Atualiza o gráfico da composição xD e insere rótulo do último valor"""
         # Manter apenas os últimos 100 pontos
         if self.series_xD.count() >= 100:
             self.series_xD.removePoints(0, 1)
             self.axis_x_xD.setRange(self.tempo - 100, self.tempo)
-        
+
         # Adicionar novo ponto
         self.series_xD.append(self.tempo, xD)
+
+        # Remover rótulo anterior, se existir
+        if hasattr(self, 'label_xD'):
+            self.chart_xD.scene().removeItem(self.label_xD)
+
+        # Adicionar rótulo do último valor
+        label = QGraphicsSimpleTextItem(f"{xD:.2f}")
+        pos = self.chart_xD.mapToPosition(self.series_xD.pointsVector()[-1], self.series_xD)
+        label.setPos(pos.x(), pos.y() - 20)
+        self.chart_xD.scene().addItem(label)
+        self.label_xD = label
 
 def main():
     app = QApplication(sys.argv)
@@ -260,15 +250,11 @@ def main():
             for elem_name, value in dial_mapping.items():
                 if elem_name in elementos_ui:
                     try:
-                        # Bloquear temporariamente o sinal para evitar loops
                         elementos_ui[elem_name].blockSignals(True)
                         elementos_ui[elem_name].setValue(value)
                         elementos_ui[elem_name].blockSignals(False)
                     except Exception as e:
                         print(f"Erro ao atualizar {elem_name}: {e}")
-            
-            # Atualizar tabela de temperaturas
-            supervisor.atualizar_tabela_temperaturas(dados['T_prato'])
             
             # Atualizar gráficos
             supervisor.atualizar_grafico_temperaturas(dados['T_prato'])
