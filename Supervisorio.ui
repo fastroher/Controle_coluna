@@ -72,6 +72,7 @@
         <property name="styleSheet">
          <string notr="true">background-color: #AFEEEE;
 font-weight: bold;
+color: black;
 </string>
         </property>
         <property name="currentIndex">
@@ -222,6 +223,9 @@ QPushButton:pressed {
             <property name="text">
              <string>Resisência 2</string>
             </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -232,7 +236,7 @@ QPushButton:pressed {
            <x>0</x>
            <y>0</y>
            <width>115</width>
-           <height>50</height>
+           <height>85</height>
           </rect>
          </property>
          <attribute name="label">
