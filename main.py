@@ -198,12 +198,12 @@ def main():
             'lcd_xB': supervisor.lcd_xB,
             'lcd_MB': supervisor.lcd_MB,
             'lcd_MD': supervisor.lcd_MD,
-            'lcd_VL': supervisor.lcd_VL,
-            'lcd_VD': supervisor.lcd_VD,
-            'lcd_RB': supervisor.lcd_RB,
-            'dial_ctr_VL': supervisor.dial_ctr_VL,
-            'dial_ctr_VD': supervisor.dial_ctr_VD,
-            'dial_RB': supervisor.dial_RB
+            #'lcd_VL': supervisor.lcd_VL,
+            #'lcd_VD': supervisor.lcd_VD,
+            #'lcd_RB': supervisor.lcd_RB,
+            #'dial_ctr_VL': supervisor.dial_ctr_VL,
+            #'dial_ctr_VD': supervisor.dial_ctr_VD,
+            #'dial_RB': supervisor.dial_RB
         }
         
         for elem_name, element in element_mapping.items():
@@ -228,9 +228,9 @@ def main():
                 'lcd_xB': dados['xB'],
                 'lcd_MB': dados['MB'],
                 'lcd_MD': dados['MD'],
-                'lcd_VL': dados['VL'],
-                'lcd_VD': dados['VD'],
-                'lcd_RB': dados['RB']
+                #'lcd_VL': dados['VL'],
+                #'lcd_VD': dados['VD'],
+                #'lcd_RB': dados['RB']
             }
             
             for elem_name, value in lcd_mapping.items():
@@ -241,20 +241,20 @@ def main():
                         print(f"Erro ao atualizar {elem_name}: {e}")
             
             # Atualizar Dials (apenas valores inteiros)
-            dial_mapping = {
-                'dial_ctr_VL': int(dados['VL']),
-                'dial_ctr_VD': int(dados['VD']),
-                'dial_RB': int(dados['RB'])
-            }
+            #dial_mapping = {
+            #    'dial_ctr_VL': int(dados['VL']),
+            #    'dial_ctr_VD': int(dados['VD']),
+            #    'dial_RB': int(dados['RB'])
+            #}
             
-            for elem_name, value in dial_mapping.items():
-                if elem_name in elementos_ui:
-                    try:
-                        elementos_ui[elem_name].blockSignals(True)
-                        elementos_ui[elem_name].setValue(value)
-                        elementos_ui[elem_name].blockSignals(False)
-                    except Exception as e:
-                        print(f"Erro ao atualizar {elem_name}: {e}")
+            #for elem_name, value in dial_mapping.items():
+            #    if elem_name in elementos_ui:
+            #        try:
+            #            elementos_ui[elem_name].blockSignals(True)
+            #            elementos_ui[elem_name].setValue(value)
+            #            elementos_ui[elem_name].blockSignals(False)
+            #        except Exception as e:
+            #            print(f"Erro ao atualizar {elem_name}: {e}")
             
             # Atualizar gráficos
             supervisor.atualizar_grafico_temperaturas(dados['T_prato'])

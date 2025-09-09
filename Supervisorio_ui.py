@@ -76,6 +76,7 @@ class Ui_Superv_geral(object):
         self.toolBox.setSizePolicy(sizePolicy1)
         self.toolBox.setStyleSheet(u"background-color: #AFEEEE;\n"
 "font-weight: bold;\n"
+"color: black;\n"
 "")
         self.layout_tool_manual = QWidget()
         self.layout_tool_manual.setObjectName(u"layout_tool_manual")
@@ -194,13 +195,14 @@ class Ui_Superv_geral(object):
 "QPushButton:pressed {\n"
 "    background-color: #d0d0d0;\n"
 "}")
+        self.pushButton_2.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.pushButton_2, 1, 2, 1, 1)
 
         self.toolBox.addItem(self.layout_tool_manual, u"Controle Manual")
         self.layout_tool_auto = QWidget()
         self.layout_tool_auto.setObjectName(u"layout_tool_auto")
-        self.layout_tool_auto.setGeometry(QRect(0, 0, 115, 50))
+        self.layout_tool_auto.setGeometry(QRect(0, 0, 115, 85))
         self.horizontalLayout = QHBoxLayout(self.layout_tool_auto)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.pushButton_3 = QPushButton(self.layout_tool_auto)
@@ -346,4 +348,3 @@ class Ui_Superv_geral(object):
         self.label_MD.setText(QCoreApplication.translate("Superv_geral", u"MD", None))
         self.label_MB.setText(QCoreApplication.translate("Superv_geral", u"MB", None))
     # retranslateUi
-

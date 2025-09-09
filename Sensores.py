@@ -14,9 +14,9 @@ class Sensores(QObject):
         self.MD = 0.0
         self.xB = 0.0
         self.xD = 0.0
-        self.VL = 0.0
-        self.VD = 0.0
-        self.RB = 0.0
+        #self.VL = 0.0
+        #self.VD = 0.0
+        #self.RB = 0.0
         self._stop_event = Event()
         self.thread = None
     
@@ -50,9 +50,9 @@ class Sensores(QObject):
                 self.MD = random.uniform(0, 100)
                 self.xB = random.uniform(0, 1)  # Fração molar entre 0 e 1
                 self.xD = random.uniform(0, 1)  # Fração molar entre 0 e 1
-                self.VL = random.uniform(0, 20)
-                self.VD = random.uniform(0, 20)
-                self.RB = random.uniform(0, 10)
+                #self.VL = random.uniform(0, 99)
+                #self.VD = random.uniform(0, 99)
+                #self.RB = random.uniform(0, 99)
                 
                 # Emitir sinal com os dados atualizados
                 dados = {
@@ -61,9 +61,9 @@ class Sensores(QObject):
                     'MD': self.MD,
                     'xB': self.xB * 100,  # Converter para porcentagem para display
                     'xD': self.xD * 100,  # Converter para porcentagem para display
-                    'VL': self.VL,
-                    'VD': self.VD,
-                    'RB': self.RB
+                    #'VL': self.VL,
+                    #'VD': self.VD,
+                    #'RB': self.RB
                 }
                 self.dados_atualizados.emit(dados)
                 
