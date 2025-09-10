@@ -26,32 +26,42 @@ class Ui_Superv_geral(object):
         if not Superv_geral.objectName():
             Superv_geral.setObjectName(u"Superv_geral")
         Superv_geral.resize(1389, 839)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Superv_geral.sizePolicy().hasHeightForWidth())
+        Superv_geral.setSizePolicy(sizePolicy)
         Superv_geral.setStyleSheet(u"background-color: #E0FFFF;")
         self.layout_principal = QWidget(Superv_geral)
         self.layout_principal.setObjectName(u"layout_principal")
-        self.horizontalLayout_5 = QHBoxLayout(self.layout_principal)
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout = QHBoxLayout(self.layout_principal)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.layout_graph = QVBoxLayout()
         self.layout_graph.setObjectName(u"layout_graph")
         self.graph_xD = QGraphicsView(self.layout_principal)
         self.graph_xD.setObjectName(u"graph_xD")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.graph_xD.sizePolicy().hasHeightForWidth())
-        self.graph_xD.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy1.setHorizontalStretch(1)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.graph_xD.sizePolicy().hasHeightForWidth())
+        self.graph_xD.setSizePolicy(sizePolicy1)
         self.graph_xD.setStyleSheet(u"background-color: white;")
 
         self.layout_graph.addWidget(self.graph_xD)
 
         self.graph_T = QGraphicsView(self.layout_principal)
         self.graph_T.setObjectName(u"graph_T")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy2.setHorizontalStretch(1)
+        sizePolicy2.setVerticalStretch(2)
+        sizePolicy2.setHeightForWidth(self.graph_T.sizePolicy().hasHeightForWidth())
+        self.graph_T.setSizePolicy(sizePolicy2)
         self.graph_T.setStyleSheet(u"background-color: white;")
 
         self.layout_graph.addWidget(self.graph_T)
 
 
-        self.horizontalLayout_5.addLayout(self.layout_graph)
+        self.horizontalLayout.addLayout(self.layout_graph)
 
         self.layout_col = QGridLayout()
         self.layout_col.setObjectName(u"layout_col")
@@ -63,17 +73,20 @@ class Ui_Superv_geral(object):
         self.layout_col.addWidget(self.label_col, 0, 0, 1, 1)
 
 
-        self.horizontalLayout_5.addLayout(self.layout_col)
+        self.horizontalLayout.addLayout(self.layout_col)
 
         self.layout_ctr_see = QVBoxLayout()
         self.layout_ctr_see.setObjectName(u"layout_ctr_see")
         self.toolBox = QToolBox(self.layout_principal)
         self.toolBox.setObjectName(u"toolBox")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.toolBox.sizePolicy().hasHeightForWidth())
-        self.toolBox.setSizePolicy(sizePolicy1)
+        self.toolBox.setEnabled(True)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.toolBox.sizePolicy().hasHeightForWidth())
+        self.toolBox.setSizePolicy(sizePolicy3)
+        self.toolBox.setMinimumSize(QSize(342, 274))
+        self.toolBox.setMaximumSize(QSize(350, 280))
         self.toolBox.setStyleSheet(u"background-color: #AFEEEE;\n"
 "font-weight: bold;\n"
 "color: black;\n"
@@ -83,28 +96,6 @@ class Ui_Superv_geral(object):
         self.layout_tool_manual.setGeometry(QRect(0, 0, 342, 212))
         self.gridLayout_2 = QGridLayout(self.layout_tool_manual)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.layout_ctr_VL = QVBoxLayout()
-        self.layout_ctr_VL.setObjectName(u"layout_ctr_VL")
-        self.label_VL = QLabel(self.layout_tool_manual)
-        self.label_VL.setObjectName(u"label_VL")
-
-        self.layout_ctr_VL.addWidget(self.label_VL)
-
-        self.lcd_VL = QLCDNumber(self.layout_tool_manual)
-        self.lcd_VL.setObjectName(u"lcd_VL")
-        self.lcd_VL.setStyleSheet(u"background-color: white;")
-
-        self.layout_ctr_VL.addWidget(self.lcd_VL)
-
-        self.dial_ctr_VL = QDial(self.layout_tool_manual)
-        self.dial_ctr_VL.setObjectName(u"dial_ctr_VL")
-        self.dial_ctr_VL.setStyleSheet(u"background-color: #B0E0E6;")
-
-        self.layout_ctr_VL.addWidget(self.dial_ctr_VL)
-
-
-        self.gridLayout_2.addLayout(self.layout_ctr_VL, 0, 1, 1, 1)
-
         self.layout_ctr_VD = QVBoxLayout()
         self.layout_ctr_VD.setObjectName(u"layout_ctr_VD")
         self.label_VD = QLabel(self.layout_tool_manual)
@@ -126,6 +117,28 @@ class Ui_Superv_geral(object):
 
 
         self.gridLayout_2.addLayout(self.layout_ctr_VD, 0, 0, 1, 1)
+
+        self.layout_ctr_VL = QVBoxLayout()
+        self.layout_ctr_VL.setObjectName(u"layout_ctr_VL")
+        self.label_VL = QLabel(self.layout_tool_manual)
+        self.label_VL.setObjectName(u"label_VL")
+
+        self.layout_ctr_VL.addWidget(self.label_VL)
+
+        self.lcd_VL = QLCDNumber(self.layout_tool_manual)
+        self.lcd_VL.setObjectName(u"lcd_VL")
+        self.lcd_VL.setStyleSheet(u"background-color: white;")
+
+        self.layout_ctr_VL.addWidget(self.lcd_VL)
+
+        self.dial_ctr_VL = QDial(self.layout_tool_manual)
+        self.dial_ctr_VL.setObjectName(u"dial_ctr_VL")
+        self.dial_ctr_VL.setStyleSheet(u"background-color: #B0E0E6;")
+
+        self.layout_ctr_VL.addWidget(self.dial_ctr_VL)
+
+
+        self.gridLayout_2.addLayout(self.layout_ctr_VL, 0, 1, 1, 1)
 
         self.layout_ctr_RB = QVBoxLayout()
         self.layout_ctr_RB.setObjectName(u"layout_ctr_RB")
@@ -149,9 +162,9 @@ class Ui_Superv_geral(object):
 
         self.gridLayout_2.addLayout(self.layout_ctr_RB, 0, 2, 1, 1)
 
-        self.pushButton = QPushButton(self.layout_tool_manual)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setStyleSheet(u"QPushButton {\n"
+        self.button_R1 = QPushButton(self.layout_tool_manual)
+        self.button_R1.setObjectName(u"button_R1")
+        self.button_R1.setStyleSheet(u"QPushButton {\n"
 "    background-color: #DC3545 ;\n"
 "    color: white;\n"
 "    font-weight: bold;\n"
@@ -170,13 +183,13 @@ class Ui_Superv_geral(object):
 "QPushButton:pressed {\n"
 "    background-color: #d0d0d0;\n"
 "}")
-        self.pushButton.setCheckable(True)
+        self.button_R1.setCheckable(True)
 
-        self.gridLayout_2.addWidget(self.pushButton, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.button_R1, 1, 0, 1, 1)
 
-        self.pushButton_2 = QPushButton(self.layout_tool_manual)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-        self.pushButton_2.setStyleSheet(u"QPushButton {\n"
+        self.button_R2 = QPushButton(self.layout_tool_manual)
+        self.button_R2.setObjectName(u"button_R2")
+        self.button_R2.setStyleSheet(u"QPushButton {\n"
 "    background-color: #DC3545 ;\n"
 "    color: white;\n"
 "    font-weight: bold;\n"
@@ -195,20 +208,44 @@ class Ui_Superv_geral(object):
 "QPushButton:pressed {\n"
 "    background-color: #d0d0d0;\n"
 "}")
-        self.pushButton_2.setCheckable(True)
+        self.button_R2.setCheckable(True)
 
-        self.gridLayout_2.addWidget(self.pushButton_2, 1, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.button_R2, 1, 2, 1, 1)
 
         self.toolBox.addItem(self.layout_tool_manual, u"Controle Manual")
         self.layout_tool_auto = QWidget()
         self.layout_tool_auto.setObjectName(u"layout_tool_auto")
-        self.layout_tool_auto.setGeometry(QRect(0, 0, 115, 85))
-        self.horizontalLayout = QHBoxLayout(self.layout_tool_auto)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.pushButton_3 = QPushButton(self.layout_tool_auto)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.layout_tool_auto.setGeometry(QRect(0, 0, 342, 212))
+        self.gridLayout_3 = QGridLayout(self.layout_tool_auto)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.button_pred = QPushButton(self.layout_tool_auto)
+        self.button_pred.setObjectName(u"button_pred")
+        self.button_pred.setStyleSheet(u"background-color: #B0E0E6;")
 
-        self.horizontalLayout.addWidget(self.pushButton_3)
+        self.gridLayout.addWidget(self.button_pred, 3, 0, 1, 1)
+
+        self.button_fuzzy = QPushButton(self.layout_tool_auto)
+        self.button_fuzzy.setObjectName(u"button_fuzzy")
+        self.button_fuzzy.setStyleSheet(u"background-color: #B0E0E6;")
+
+        self.gridLayout.addWidget(self.button_fuzzy, 0, 0, 1, 1)
+
+        self.button_RN = QPushButton(self.layout_tool_auto)
+        self.button_RN.setObjectName(u"button_RN")
+        self.button_RN.setStyleSheet(u"background-color: #B0E0E6;")
+
+        self.gridLayout.addWidget(self.button_RN, 1, 0, 1, 1)
+
+        self.button_ID = QPushButton(self.layout_tool_auto)
+        self.button_ID.setObjectName(u"button_ID")
+        self.button_ID.setStyleSheet(u"background-color: #B0E0E6;")
+
+        self.gridLayout.addWidget(self.button_ID, 2, 0, 1, 1)
+
+
+        self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 1)
 
         self.toolBox.addItem(self.layout_tool_auto, u"Controle Autom\u00e1tico")
 
@@ -218,6 +255,8 @@ class Ui_Superv_geral(object):
         self.layout_see_xD.setObjectName(u"layout_see_xD")
         self.label_xD = QLabel(self.layout_principal)
         self.label_xD.setObjectName(u"label_xD")
+        sizePolicy.setHeightForWidth(self.label_xD.sizePolicy().hasHeightForWidth())
+        self.label_xD.setSizePolicy(sizePolicy)
         self.label_xD.setStyleSheet(u"background-color: #B0E0E6;\n"
 "color: black;\n"
 "font-weight: bold;\n"
@@ -317,7 +356,7 @@ class Ui_Superv_geral(object):
         self.layout_ctr_see.addLayout(self.layout_see_MB)
 
 
-        self.horizontalLayout_5.addLayout(self.layout_ctr_see)
+        self.horizontalLayout.addLayout(self.layout_ctr_see)
 
         Superv_geral.setCentralWidget(self.layout_principal)
 
@@ -335,16 +374,20 @@ class Ui_Superv_geral(object):
     def retranslateUi(self, Superv_geral):
         Superv_geral.setWindowTitle(QCoreApplication.translate("Superv_geral", u"MainWindow", None))
         self.label_col.setText(QCoreApplication.translate("Superv_geral", u"<html><head/><body><p align=\"center\"><img src=\":/Imagens/Imagens/Coluna destila\u00e7\u00e3o v5.png\"/></p></body></html>", None))
-        self.label_VL.setText(QCoreApplication.translate("Superv_geral", u"VL", None))
         self.label_VD.setText(QCoreApplication.translate("Superv_geral", u"VD", None))
+        self.label_VL.setText(QCoreApplication.translate("Superv_geral", u"VL", None))
         self.label_RB.setText(QCoreApplication.translate("Superv_geral", u"RB", None))
-        self.pushButton.setText(QCoreApplication.translate("Superv_geral", u"Resist\u00eancia 1", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Superv_geral", u"Resis\u00eancia 2", None))
+        self.button_R1.setText(QCoreApplication.translate("Superv_geral", u"Resist\u00eancia 1", None))
+        self.button_R2.setText(QCoreApplication.translate("Superv_geral", u"Resis\u00eancia 2", None))
         self.toolBox.setItemText(self.toolBox.indexOf(self.layout_tool_manual), QCoreApplication.translate("Superv_geral", u"Controle Manual", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Superv_geral", u"PushButton", None))
+        self.button_pred.setText(QCoreApplication.translate("Superv_geral", u"Control Preditivo", None))
+        self.button_fuzzy.setText(QCoreApplication.translate("Superv_geral", u"Fuzzy", None))
+        self.button_RN.setText(QCoreApplication.translate("Superv_geral", u"Redes Neurais", None))
+        self.button_ID.setText(QCoreApplication.translate("Superv_geral", u"Identifica\u00e7\u00e3o", None))
         self.toolBox.setItemText(self.toolBox.indexOf(self.layout_tool_auto), QCoreApplication.translate("Superv_geral", u"Controle Autom\u00e1tico", None))
         self.label_xD.setText(QCoreApplication.translate("Superv_geral", u"xD", None))
         self.label_xB.setText(QCoreApplication.translate("Superv_geral", u"xB", None))
         self.label_MD.setText(QCoreApplication.translate("Superv_geral", u"MD", None))
         self.label_MB.setText(QCoreApplication.translate("Superv_geral", u"MB", None))
     # retranslateUi
+

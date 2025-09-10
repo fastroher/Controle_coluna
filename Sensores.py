@@ -45,7 +45,8 @@ class Sensores(QObject):
         while not self._stop_event.is_set():
             try:
                 # Gerar novos valores aleatórios
-                self.T_prato = [random.uniform(0, 100) for _ in range(14)]
+                self.T_prato = [random.uniform(i * 10 + 1, (i + 1) * 10) for i in range(14)]
+#                self.T_prato = [random.uniform(0, 100) for _ in range(14)]
                 self.MB = random.uniform(0, 100)
                 self.MD = random.uniform(0, 100)
                 self.xB = random.uniform(0, 1)  # Fração molar entre 0 e 1

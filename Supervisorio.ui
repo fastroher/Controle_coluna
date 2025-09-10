@@ -10,6 +10,12 @@
     <height>839</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -17,7 +23,7 @@
    <string notr="true">background-color: #E0FFFF;</string>
   </property>
   <widget class="QWidget" name="layout_principal">
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <layout class="QVBoxLayout" name="layout_graph">
       <item>
@@ -35,6 +41,12 @@
       </item>
       <item>
        <widget class="QGraphicsView" name="graph_T">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: white;</string>
         </property>
@@ -63,11 +75,26 @@
      <layout class="QVBoxLayout" name="layout_ctr_see">
       <item>
        <widget class="QToolBox" name="toolBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>342</width>
+          <height>274</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>350</width>
+          <height>280</height>
+         </size>
         </property>
         <property name="styleSheet">
          <string notr="true">background-color: #AFEEEE;
@@ -91,31 +118,6 @@ color: black;
           <string>Controle Manual</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="1">
-           <layout class="QVBoxLayout" name="layout_ctr_VL">
-            <item>
-             <widget class="QLabel" name="label_VL">
-              <property name="text">
-               <string>VL</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLCDNumber" name="lcd_VL">
-              <property name="styleSheet">
-               <string notr="true">background-color: white;</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDial" name="dial_ctr_VL">
-              <property name="styleSheet">
-               <string notr="true">background-color: #B0E0E6;</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
           <item row="0" column="0">
            <layout class="QVBoxLayout" name="layout_ctr_VD">
             <item>
@@ -134,6 +136,31 @@ color: black;
             </item>
             <item>
              <widget class="QDial" name="dial_ctr_VD">
+              <property name="styleSheet">
+               <string notr="true">background-color: #B0E0E6;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="layout_ctr_VL">
+            <item>
+             <widget class="QLabel" name="label_VL">
+              <property name="text">
+               <string>VL</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLCDNumber" name="lcd_VL">
+              <property name="styleSheet">
+               <string notr="true">background-color: white;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDial" name="dial_ctr_VL">
               <property name="styleSheet">
                <string notr="true">background-color: #B0E0E6;</string>
               </property>
@@ -167,7 +194,7 @@ color: black;
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="button_R1">
             <property name="styleSheet">
              <string notr="true">QPushButton {
     background-color: #DC3545 ;
@@ -198,7 +225,7 @@ QPushButton:pressed {
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="button_R2">
             <property name="styleSheet">
              <string notr="true">QPushButton {
     background-color: #DC3545 ;
@@ -235,20 +262,57 @@ QPushButton:pressed {
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>115</width>
-           <height>85</height>
+           <width>342</width>
+           <height>212</height>
           </rect>
          </property>
          <attribute name="label">
           <string>Controle Automático</string>
          </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QPushButton" name="pushButton_3">
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="3" column="0">
+             <widget class="QPushButton" name="button_pred">
+              <property name="styleSheet">
+               <string notr="true">background-color: #B0E0E6;</string>
+              </property>
+              <property name="text">
+               <string>Control Preditivo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="button_fuzzy">
+              <property name="styleSheet">
+               <string notr="true">background-color: #B0E0E6;</string>
+              </property>
+              <property name="text">
+               <string>Fuzzy</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="button_RN">
+              <property name="styleSheet">
+               <string notr="true">background-color: #B0E0E6;</string>
+              </property>
+              <property name="text">
+               <string>Redes Neurais</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="button_ID">
+              <property name="styleSheet">
+               <string notr="true">background-color: #B0E0E6;</string>
+              </property>
+              <property name="text">
+               <string>Identificação</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -258,6 +322,12 @@ QPushButton:pressed {
        <layout class="QHBoxLayout" name="layout_see_xD">
         <item>
          <widget class="QLabel" name="label_xD">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="styleSheet">
            <string notr="true">background-color: #B0E0E6;
 color: black;
