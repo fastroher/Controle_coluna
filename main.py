@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QLCDNumber, QDial, QVBoxLayout, QWidget, QGraphicsSimpleTextItem
+from PySide6.QtWidgets import QApplication, QMainWindow, QLCDNumber, QDial, QVBoxLayout, QWidget, QGraphicsSimpleTextItem, QSizePolicy
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor, QPainter
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
@@ -33,32 +33,42 @@ class SupervisaoGeralApp(QMainWindow):
         
     def setup_graficos(self):
         """Configura os gráficos substituindo QGraphicsView por QChartView"""
+        # Copiar sizePolicy dos widgets originais
+        size_policy_T = self.ui.graph_T.sizePolicy()
+        size_policy_xD = self.ui.graph_xD.sizePolicy()
+
         # Substituir graph_T por QChartView
         layout_T = QVBoxLayout()
         self.chart_view_T = QChartView()
         self.chart_view_T.setRenderHint(QPainter.Antialiasing)
+        self.chart_view_T.setSizePolicy(size_policy_T)  # Aplica o mesmo sizePolicy
         layout_T.addWidget(self.chart_view_T)
-        
+
         # Substituir graph_xD por QChartView
         layout_xD = QVBoxLayout()
         self.chart_view_xD = QChartView()
         self.chart_view_xD.setRenderHint(QPainter.Antialiasing)
+        self.chart_view_xD.setSizePolicy(size_policy_xD)  # Aplica o mesmo sizePolicy
         layout_xD.addWidget(self.chart_view_xD)
-        
+
         # Configurar os layouts nos widgets existentes
         widget_T = QWidget()
         widget_T.setLayout(layout_T)
         widget_xD = QWidget()
         widget_xD.setLayout(layout_xD)
-        
-        # Adicionar aos layouts existentes
-        self.ui.graph_T.setParent(None)  # Remover o QGraphicsView original
-        self.ui.graph_xD.setParent(None)  # Remover o QGraphicsView original
-        
+
+        # Remover os QGraphicsView originais
+        self.ui.graph_T.setParent(None)
+        self.ui.graph_xD.setParent(None)
+
         # Adicionar os novos chart views no layout
         self.ui.layout_graph.insertWidget(0, widget_xD)
         self.ui.layout_graph.insertWidget(1, widget_T)
-        
+
+        # Ajuste de proporção: gráfico de temperatura maior que gráfico xD
+        self.ui.layout_graph.setStretch(0, 1)  # widget_xD ocupa 1 parte
+        self.ui.layout_graph.setStretch(1, 2)  # widget_T ocupa 2 partes
+
         # Configurar os gráficos
         self.setup_grafico_temperaturas()
         self.setup_grafico_xD()
@@ -77,8 +87,8 @@ class SupervisaoGeralApp(QMainWindow):
         
         self.axis_y_T = QValueAxis()
         self.axis_y_T.setTitleText("Temperatura (°C)")
-        self.axis_y_T.setRange(0, 100)
-        
+        self.axis_y_T.setRange(0, 140)
+      
         self.chart_T.addAxis(self.axis_x_T, Qt.AlignBottom)
         self.chart_T.addAxis(self.axis_y_T, Qt.AlignLeft)
         
@@ -92,7 +102,7 @@ class SupervisaoGeralApp(QMainWindow):
         
         for i in range(14):
             series = QLineSeries()
-            series.setName(f"Prato {i+1}")
+            series.setName(f"P{i+1}")
             pen = QPen(colors[i % len(colors)])
             pen.setWidth(2)
             series.setPen(pen)
@@ -103,6 +113,12 @@ class SupervisaoGeralApp(QMainWindow):
         
         # Configurar o chart view
         self.chart_view_T.setChart(self.chart_T)
+
+        # Garantir que a legenda está visível e bem posicionada
+        legend = self.chart_T.legend()
+        legend.setVisible(True)
+        legend.setAlignment(Qt.AlignBottom)  # Ou Qt.AlignRight, Qt.AlignLeft, etc.
+        #legend.setMarkerShape(legend.MarkerShapeRectangle)  # Opcional: formato dos marcadores
     
     def setup_grafico_xD(self):
         """Configura o gráfico da composição xD"""
