@@ -20,11 +20,11 @@ import traceback
 #classe relacionada a tela geral do supervisório
 class SupervisaoGeralApp(QMainWindow):
     def __init__(self):
-        super().__init__()
-        self.ui = Ui_Superv_geral()                     # Criar instância da UI, sem atributos
-        self.ui.setupUi(self)                           # Organiza os widgets na janela
+        super().__init__()                  # Inicializa a janela principal executando o método _init__ da classe pai (QMainWindow). super() localiza a classe base (QMainWindow)
+        self.ui = Ui_Superv_geral()         # Criar instância da UI, sem atributos
+        self.ui.setupUi(self)               # Organiza os widgets na janela
         
-        # Tornar os elementos da UI acessíveis
+        # Tornar os elementos da UI acessíveis (Atributos da instância)
         self.lcd_xD = self.ui.lcd_xD
         self.lcd_xB = self.ui.lcd_xB
         self.lcd_MB = self.ui.lcd_MB
@@ -92,7 +92,7 @@ class SupervisaoGeralApp(QMainWindow):
         # Criar chart
         self.chart_T = QChart()
         self.chart_T.setTitle("Temperatura dos Pratos")
-        self.chart_T.setAnimationOptions(QChart.SeriesAnimations)
+        self.chart_T.setAnimationOptions(QChart.SeriesAnimations)   # Gera a animação para a transição de pontos
         
         # Configurar eixos
         self.axis_x_T = QValueAxis()
@@ -167,8 +167,7 @@ class SupervisaoGeralApp(QMainWindow):
         # Mantem apenas os últimos 100 pontos
         if self.tempo > 100:
             for series in self.series_T:
-                if series.count() > 0:
-                    series.removePoints(0, 1)
+                series.removePoints(0, 1)
             self.axis_x_T.setRange(self.tempo - 100, self.tempo)
 
         # Adicionar novos pontos
@@ -208,9 +207,9 @@ class SupervisaoGeralApp(QMainWindow):
         self.chart_xD.scene().addItem(label)
         self.label_xD = label
 
-    # Criar nova janela com a UI de Dados
+    # Abre a janela de Dados
     def open_Dados_window(self):
-        self.dados_window.show()   # agora usa a instância única
+        self.dados_window.show()   
 
 #Classe relacionada a tela de Dados
 class SupervisaoDadosApp(QMainWindow):
@@ -220,199 +219,120 @@ class SupervisaoDadosApp(QMainWindow):
         self.ui_Dados.setupUi(self)
         self.coleta_dados = self.ui_Dados.Slider_dados
 
-        # Colunas padrão (sem espaços)
+        # Colunas do arquivo histórico (CSV)
         self.colunas = [
             'Data', 'Hora', 'xD', 'xB', 'MB', 'MD', 'VD', 'VL', 'VF',
             'VB', 'RB', 'R1', 'R2', 'TA', 'T1', 'T2', 'T3', 'T4', 'T5',
             'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14'
         ]
 
-        # Inicializa o arquivo histórico
-        self._inicializar_arquivo_historico()
+        
+        self.inicializar_arquivo_historico()
 
-    def _inicializar_arquivo_historico(self):
+    # Inicializa o arquivo histórico
+    def inicializar_arquivo_historico(self):
         arquivo = 'SensorAtuadorHist.csv'
-        if not os.path.exists(arquivo):
-            # Cria arquivo vazio apenas com cabeçalho
-            pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
+        
+        if not os.path.exists(arquivo):           
+            pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)  # Cria arquivo vazio apenas com cabeçalho
             print(f"Arquivo {arquivo} criado com cabeçalho.")
+
         else:
-            try:
-                df = pd.read_csv(arquivo)
-                # Remove espaços dos nomes das colunas
-                df.columns = df.columns.str.strip()
-                # Verifica se as colunas necessárias estão presentes e na ordem correta
-                if list(df.columns) == self.colunas:
+            df = pd.read_csv(arquivo)                
+            df.columns = df.columns.str.strip()     # Remove espaços dos nomes das colunas
+
+            # Verifica se as colunas necessárias estão presentes e na ordem correta
+            if list(df.columns) == self.colunas:
                     print("Arquivo histórico já está no formato correto.")
-                else:
-                    # Se não estiver correto, faz backup e recria
-                    backup = arquivo.replace('.csv', '_backup.csv')
-                    os.rename(arquivo, backup)
-                    print(f"Arquivo histórico corrompido. Backup salvo como {backup}. Recriando...")
-                    pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
-            except Exception as e:
-                print(f"Erro ao ler arquivo histórico: {e}. Recriando...")
-                # Se houver erro, tenta renomear e recriar
-                if os.path.exists(arquivo):
-                    backup = arquivo.replace('.csv', '_backup_erro.csv')
-                    os.rename(arquivo, backup)
-                    print(f"Arquivo problemático renomeado para {backup}.")
+
+            # Se não estiver correto, faz backup e recria
+            else:
+                backup = arquivo.replace('.csv', '_backup.csv')
+                os.rename(arquivo, backup)
+                print(f"Arquivo histórico corrompido. Backup salvo como {backup}. Recriando...")
                 pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
+                print(f"Arquivo {arquivo} recriado com cabeçalho.")
 
+    #Coleta dados dos sensores e armazena em arquivos CSV, só executa se o Slider_dados for igual a 1
     def Coletar_dados(self, dados_sensores):
-        """
-        Coleta dados dos sensores e armazena em arquivos CSV.
-        Só executa se o Slider_dados for igual a 1.
-        """
-        print(f"Coletar_dados chamado. Slider value: {self.coleta_dados.value()}")  # Debug
-
+      
         if self.coleta_dados.value() == 0:
-            print("Coleta desabilitada (slider=0).")
             return
 
-        print("Coleta habilitada, processando dados...")
-
-        try:
-            # Processa data/hora
-            data_hora_str = dados_sensores.get('Data/Hora', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            try:
-                data, hora = data_hora_str.split(' ')
-            except ValueError:
-                data = data_hora_str
-                hora = "00:00:00"
+        data_hora_str = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        data, hora = data_hora_str.split(' ')                 #divide em duas colonas (considerando espaoço entre a variável)
 
             # Prepara dicionário com todos os campos (na ordem das colunas)
-            linha = {
+        linha = {
                 'Data': data,
                 'Hora': hora,
-                'xD': dados_sensores.get('xD', 0.0),
-                'xB': dados_sensores.get('xB', 0.0),
-                'MB': dados_sensores.get('MB', 0.0),
-                'MD': dados_sensores.get('MD', 0.0),
-                'VD': dados_sensores.get('VD', 0.0),
-                'VL': dados_sensores.get('VL', 0.0),
-                'VF': dados_sensores.get('VF', 0.0),
-                'VB': dados_sensores.get('VB', 0.0),
-                'RB': dados_sensores.get('RB', 0.0),
-                'R1': dados_sensores.get('R1', 0.0),
-                'R2': dados_sensores.get('R2', 0.0),
-                'TA': dados_sensores.get('TA', 0.0),
+                'xD': dados_sensores.get('xD'),
+                'xB': dados_sensores.get('xB'),
+                'MB': dados_sensores.get('MB'),
+                'MD': dados_sensores.get('MD'),
+                'VD': dados_sensores.get('VD'),
+                'VL': dados_sensores.get('VL'),
+                'VF': dados_sensores.get('VF'),
+                'VB': dados_sensores.get('VB'),
+                'RB': dados_sensores.get('RB'),
+                'R1': dados_sensores.get('R1'),
+                'R2': dados_sensores.get('R2'),
+                'TA': dados_sensores.get('TA'),
             }
 
-            # Temperaturas dos pratos
-            temperaturas = dados_sensores.get('T_prato', [0.0]*14)
-            for i in range(14):
+        # Temperaturas dos pratos
+        temperaturas = dados_sensores.get('T_prato', [0.0]*14)
+        for i in range(14):
                 linha[f'T{i+1}'] = temperaturas[i]
 
-            # Cria DataFrame com uma única linha
-            df_linha = pd.DataFrame([linha])
+        # Cria DataFrame com uma única linha
+        df_linha = pd.DataFrame([linha])
 
-            # Salva no arquivo "atual" (sobrescreve)
-            #df_linha.to_csv('SensorAtuadorAtual.csv', index=False)
-            #print("Arquivo SensorAtuadorAtual.csv atualizado.")
-
-            # Salva no histórico em modo append (sem cabeçalho)
-            df_linha.to_csv('SensorAtuadorHist.csv', mode='a', header=False, index=False)
-            print("Dados adicionados ao SensorAtuadorHist.csv")
-
-            print(f"Dados salvos - xD: {dados_sensores.get('xD', 0.0):.2f}")
-
-        except Exception as e:
-            print(f"Erro ao coletar dados: {e}")
-            traceback.print_exc()  # Mostra o stack trace completo
+        # Salva no histórico em modo append (sem cabeçalho)
+        df_linha.to_csv('SensorAtuadorHist.csv', mode='a', header=False, index=False)   #mode 'a' para append
+        traceback.print_exc()  # Mostra o stack trace completo
 
 def main():
     app = QApplication(sys.argv)
     supervisor = SupervisaoGeralApp()
     Dados_supervisor = SupervisaoDadosApp()
-    supervisor.dados_window = Dados_supervisor 
-    sensores = Sensores(ui_principal=supervisor.ui)
-    
-    # Buscar elementos da UI
-    def encontrar_elementos():
-        elementos = {}
+    supervisor.dados_window = Dados_supervisor       # Atribui a janela de dados como atributo da janela principal para acesso posterior
+    sensores = Sensores(ui_principal=supervisor.ui)  # Permite que a classe sensores acesse os elementos da UI principal para atualizar os gráficos e LCDs diretamente
         
-        # Lista de elementos que queremos encontrar
-        element_mapping = {
-            'lcd_xD': supervisor.lcd_xD,
-            'lcd_xB': supervisor.lcd_xB,
-            'lcd_MB': supervisor.lcd_MB,
-            'lcd_MD': supervisor.lcd_MD,
-        }
-        
-        for elem_name, element in element_mapping.items():
-            if element is not None:
-                elementos[elem_name] = element
-                print(f"Encontrado: {elem_name}")
-            else:
-                print(f"Elemento {elem_name} não encontrado")
-        
-        return elementos
-    
-    elementos_ui = encontrar_elementos()
-    print("Elementos encontrados:", list(elementos_ui.keys()))
-    
+    # Método para atualizar a UI principal com os dados dos sensores
     def atualizar_ui(dados):
-        try:
-            print(f"Atualizando UI: xD={dados['xD']:.2f}%")
-            
-            # Atualizar LCDs
-            lcd_mapping = {
-                'lcd_xD': dados['xD'],
-                'lcd_xB': dados['xB'],
-                'lcd_MB': dados['MB'],
-                'lcd_MD': dados['MD'],
-            }
-            
-            for elem_name, value in lcd_mapping.items():
-                if elem_name in elementos_ui:
-                    try:
-                        elementos_ui[elem_name].display(float(value))
-                    except Exception as e:
-                        print(f"Erro ao atualizar {elem_name}: {e}")
-         
-            # Atualizar gráficos
-            supervisor.atualizar_grafico_temperaturas(dados['T_prato'])
-            supervisor.atualizar_grafico_xD(dados['xD'])
-            
-            # Coletar dados se o slider estiver habilitado (= 1)
-            Dados_supervisor.Coletar_dados(dados)
-                        
-        except Exception as e:
-            print(f"Erro geral ao atualizar UI: {e}")
+
+        # Atualizar LCDs
+        supervisor.lcd_xD.display(dados['xD'])
+        supervisor.lcd_xB.display(dados['xB'])
+        supervisor.lcd_MB.display(dados['MB'])
+        supervisor.lcd_MD.display(dados['MD'])
+
+        # Atualizar gráficos
+        supervisor.atualizar_grafico_temperaturas(dados['T_prato'])
+        supervisor.atualizar_grafico_xD(dados['xD'])
+                     
+        # Coletar dados se o slider estiver habilitado (= 1)
+        Dados_supervisor.Coletar_dados(dados)                # Esta dentro do método para que a coleta ocorra na mesma frequencia da atualização gráfica
     
-    # Conectar sinal de atualização
+    # Conectar sinal de atualização dos sensores ao método de atualização da UI
     sensores.dados_atualizados.connect(atualizar_ui)
     
     def parar_sensores():
-        print("Parando sensores...")
         sensores.parar_leitura_escrita()
+        
+    atexit.register(parar_sensores)      # Garante a execução do método quando o python é encerrado. Se esquecer alguma janela aberta ele não atua
     
-    # Registrar para executar quando o programa terminar
-    atexit.register(parar_sensores)
-    
-    # Sobrescrever o método closeEvent
+    # Garantir que os sensores sejam parados quando a janela for fechada, evitando threads ou processos em execução após o fechamento da aplicação
     def closeEvent(event):
-        print("Fechando aplicação...")
         parar_sensores()
-        event.accept()
+        event.accept()            # Aceita o evento de fechamento para que a janela seja fechada normalmente
     
     supervisor.closeEvent = closeEvent
-    
-    # Iniciar sensores
     sensores.iniciar_leitura_escrita()
-    print("Sensores iniciados. Feche a janela para parar.")
-    print(f"Coleta de dados: {Dados_supervisor.coleta_dados.value()}")
     supervisor.showMaximized()  # Inicia em tela cheia
-    result = app.exec()
-    
-    # Garantir parada final
-    parar_sensores()
-    print("Aplicação encerrada.")
-    
+    result = app.exec()         #Fechando a janela termina o loop e passa para a próxima
     sys.exit(result)
-
-
 
 if __name__ == "__main__":
     main()
