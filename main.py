@@ -1,17 +1,28 @@
-import sys
+# Frames relacionados a imagens e gráficos do supervisório
 from PySide6.QtWidgets import QApplication, QMainWindow, QLCDNumber, QDial, QVBoxLayout, QWidget, QGraphicsSimpleTextItem, QSizePolicy
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor, QPainter
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
-from Supervisorio_ui import Ui_Superv_geral
-from Sensores import Sensores
-import atexit
 
+#Integração entre módulos
+from UIs.Supervisorio_ui import Ui_Superv_geral
+from SensoresAtuador import Sensores
+from UIs.Dados_ui import Ui_Dados
+
+#Frames diversos para manipulação de dados
+import atexit
+import sys
+import pandas as pd
+from datetime import datetime
+import os
+import traceback
+
+#classe relacionada a tela geral do supervisório
 class SupervisaoGeralApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_Superv_geral()
-        self.ui.setupUi(self)
+        self.ui = Ui_Superv_geral()                     # Criar instância da UI, sem atributos
+        self.ui.setupUi(self)                           # Organiza os widgets na janela
         
         # Tornar os elementos da UI acessíveis
         self.lcd_xD = self.ui.lcd_xD
@@ -20,35 +31,36 @@ class SupervisaoGeralApp(QMainWindow):
         self.lcd_MD = self.ui.lcd_MD
         self.lcd_VL = self.ui.lcd_VL
         self.lcd_VD = self.ui.lcd_VD
+        self.lcd_VF = self.ui.lcd_VF
+        self.lcd_VB = self.ui.lcd_VB
         self.lcd_RB = self.ui.lcd_RB
         self.dial_ctr_VL = self.ui.dial_ctr_VL
         self.dial_ctr_VD = self.ui.dial_ctr_VD
         self.dial_RB = self.ui.dial_RB
+
+        self.ui.button_Dados.clicked.connect(self.open_Dados_window)     # Atribuindo Sinal aos botões      
+        self.setup_graficos()                                            # Substituir QGraphicsView por QChartView para os gráficos
+        self.tempo = 0                                                   # Dados históricos para os gráficos
         
-        # Substituir QGraphicsView por QChartView para os gráficos
-        self.setup_graficos()
-        
-        # Dados históricos para os gráficos
-        self.tempo = 0
-        
+    #Configura os gráficos substituindo QGraphicsView por QChartView
     def setup_graficos(self):
-        """Configura os gráficos substituindo QGraphicsView por QChartView"""
-        # Copiar sizePolicy dos widgets originais
+        
+        # Obter as políticas de tamanho dos gráficos originais para manter a responsividade
         size_policy_T = self.ui.graph_T.sizePolicy()
         size_policy_xD = self.ui.graph_xD.sizePolicy()
 
-        # Substituir graph_T por QChartView
+        #Substituir graph_T por QChartView
         layout_T = QVBoxLayout()
         self.chart_view_T = QChartView()
         self.chart_view_T.setRenderHint(QPainter.Antialiasing)
-        self.chart_view_T.setSizePolicy(size_policy_T)  # Aplica o mesmo sizePolicy
+        self.chart_view_T.setSizePolicy(size_policy_T)  
         layout_T.addWidget(self.chart_view_T)
 
-        # Substituir graph_xD por QChartView
+        #Substituir graph_xD por QChartView
         layout_xD = QVBoxLayout()
         self.chart_view_xD = QChartView()
         self.chart_view_xD.setRenderHint(QPainter.Antialiasing)
-        self.chart_view_xD.setSizePolicy(size_policy_xD)  # Aplica o mesmo sizePolicy
+        self.chart_view_xD.setSizePolicy(size_policy_xD) 
         layout_xD.addWidget(self.chart_view_xD)
 
         # Configurar os layouts nos widgets existentes
@@ -61,20 +73,22 @@ class SupervisaoGeralApp(QMainWindow):
         self.ui.graph_T.setParent(None)
         self.ui.graph_xD.setParent(None)
 
-        # Adicionar os novos chart views no layout
-        self.ui.layout_graph.insertWidget(0, widget_xD)
-        self.ui.layout_graph.insertWidget(1, widget_T)
+        # Remover espaçamento entre os gráficos
+        self.ui.verticalLayout_7.setSpacing(0)
+        self.ui.verticalLayout_7.addWidget(widget_xD)
+        self.ui.verticalLayout_7.addWidget(widget_T)
 
         # Ajuste de proporção: gráfico de temperatura maior que gráfico xD
-        self.ui.layout_graph.setStretch(0, 1)  # widget_xD ocupa 1 parte
-        self.ui.layout_graph.setStretch(1, 2)  # widget_T ocupa 2 partes
+        self.ui.verticalLayout_7.setStretch(0, 1)  # widget_xD ocupa 1 parte
+        self.ui.verticalLayout_7.setStretch(1, 2)  # widget_T ocupa 2 partes
 
         # Configurar os gráficos
         self.setup_grafico_temperaturas()
         self.setup_grafico_xD()
-    
+
+    #Configura gráfico de temperaturas, criando as séries para cada prato e configurando os eixos   
     def setup_grafico_temperaturas(self):
-        """Configura o gráfico de temperaturas dos pratos"""
+
         # Criar chart
         self.chart_T = QChart()
         self.chart_T.setTitle("Temperatura dos Pratos")
@@ -83,12 +97,10 @@ class SupervisaoGeralApp(QMainWindow):
         # Configurar eixos
         self.axis_x_T = QValueAxis()
         self.axis_x_T.setTitleText("Tempo (s)")
-        self.axis_x_T.setRange(0, 100)
-        
+        self.axis_x_T.setRange(0, 100)               #Range inicial para os primeiros 100 segundos, depois atualizar dinamicamente
         self.axis_y_T = QValueAxis()
         self.axis_y_T.setTitleText("Temperatura (°C)")
-        self.axis_y_T.setRange(0, 140)
-      
+        self.axis_y_T.setRange(0, 140)               #Range de temperatura, pode ser ajustada conforme necessário
         self.chart_T.addAxis(self.axis_x_T, Qt.AlignBottom)
         self.chart_T.addAxis(self.axis_y_T, Qt.AlignLeft)
         
@@ -117,11 +129,10 @@ class SupervisaoGeralApp(QMainWindow):
         # Garantir que a legenda está visível e bem posicionada
         legend = self.chart_T.legend()
         legend.setVisible(True)
-        legend.setAlignment(Qt.AlignBottom)  # Ou Qt.AlignRight, Qt.AlignLeft, etc.
-        #legend.setMarkerShape(legend.MarkerShapeRectangle)  # Opcional: formato dos marcadores
+        legend.setAlignment(Qt.AlignBottom)  
     
+    #Configura gráfico de composição xD, criando a série para xD e configurando os eixos
     def setup_grafico_xD(self):
-        """Configura o gráfico da composição xD"""
         self.chart_xD = QChart()
         self.chart_xD.setTitle("Composição do Destilado (xD)")
         self.chart_xD.setAnimationOptions(QChart.SeriesAnimations)
@@ -129,22 +140,19 @@ class SupervisaoGeralApp(QMainWindow):
         # Configurar eixos
         self.axis_x_xD = QValueAxis()
         self.axis_x_xD.setTitleText("Tempo (s)")
-        self.axis_x_xD.setRange(0, 100)
-        
+        self.axis_x_xD.setRange(0, 100)                   #Inicialmente mostrar os primeiros 100 segundos, depois atualizar dinamicamente
         self.axis_y_xD = QValueAxis()
         self.axis_y_xD.setTitleText("xD (%)")
-        self.axis_y_xD.setRange(0, 100)
-        
+        self.axis_y_xD.setRange(0, 100)                   #Range de 0 a 100% para composição, pode ser ajustada conforme necessário
         self.chart_xD.addAxis(self.axis_x_xD, Qt.AlignBottom)
         self.chart_xD.addAxis(self.axis_y_xD, Qt.AlignLeft)
         
-        # Criar série para xD
+        # Cria série para xD
         self.series_xD = QLineSeries()
         self.series_xD.setName("Composição xD")
         pen = QPen(QColor(0, 0, 255))
         pen.setWidth(3)
         self.series_xD.setPen(pen)
-        
         self.chart_xD.addSeries(self.series_xD)
         self.series_xD.attachAxis(self.axis_x_xD)
         self.series_xD.attachAxis(self.axis_y_xD)
@@ -152,11 +160,11 @@ class SupervisaoGeralApp(QMainWindow):
         # Configurar o chart view
         self.chart_view_xD.setChart(self.chart_xD)
     
+    #Atualiza o gráfico de temperaturas e insere rótulo do último valor
     def atualizar_grafico_temperaturas(self, temperaturas):
-        """Atualiza o gráfico de temperaturas e insere rótulo do último valor"""
         self.tempo += 1
 
-        # Manter apenas os últimos 100 pontos
+        # Mantem apenas os últimos 100 pontos
         if self.tempo > 100:
             for series in self.series_T:
                 if series.count() > 0:
@@ -177,9 +185,10 @@ class SupervisaoGeralApp(QMainWindow):
             label.setPos(pos.x(), pos.y() - 20)  # Ajuste vertical
             self.chart_T.scene().addItem(label)
             setattr(self, f'label_T_{i}', label)
-
+    
+    #Atualiza o gráfico de composição xD e insere rótulo do último valor
     def atualizar_grafico_xD(self, xD):
-        """Atualiza o gráfico da composição xD e insere rótulo do último valor"""
+
         # Manter apenas os últimos 100 pontos
         if self.series_xD.count() >= 100:
             self.series_xD.removePoints(0, 1)
@@ -199,10 +208,125 @@ class SupervisaoGeralApp(QMainWindow):
         self.chart_xD.scene().addItem(label)
         self.label_xD = label
 
+    # Criar nova janela com a UI de Dados
+    def open_Dados_window(self):
+        self.dados_window.show()   # agora usa a instância única
+
+#Classe relacionada a tela de Dados
+class SupervisaoDadosApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui_Dados = Ui_Dados()
+        self.ui_Dados.setupUi(self)
+        self.coleta_dados = self.ui_Dados.Slider_dados
+
+        # Colunas padrão (sem espaços)
+        self.colunas = [
+            'Data', 'Hora', 'xD', 'xB', 'MB', 'MD', 'VD', 'VL', 'VF',
+            'VB', 'RB', 'R1', 'R2', 'TA', 'T1', 'T2', 'T3', 'T4', 'T5',
+            'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14'
+        ]
+
+        # Inicializa o arquivo histórico
+        self._inicializar_arquivo_historico()
+
+    def _inicializar_arquivo_historico(self):
+        arquivo = 'SensorAtuadorHist.csv'
+        if not os.path.exists(arquivo):
+            # Cria arquivo vazio apenas com cabeçalho
+            pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
+            print(f"Arquivo {arquivo} criado com cabeçalho.")
+        else:
+            try:
+                df = pd.read_csv(arquivo)
+                # Remove espaços dos nomes das colunas
+                df.columns = df.columns.str.strip()
+                # Verifica se as colunas necessárias estão presentes e na ordem correta
+                if list(df.columns) == self.colunas:
+                    print("Arquivo histórico já está no formato correto.")
+                else:
+                    # Se não estiver correto, faz backup e recria
+                    backup = arquivo.replace('.csv', '_backup.csv')
+                    os.rename(arquivo, backup)
+                    print(f"Arquivo histórico corrompido. Backup salvo como {backup}. Recriando...")
+                    pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
+            except Exception as e:
+                print(f"Erro ao ler arquivo histórico: {e}. Recriando...")
+                # Se houver erro, tenta renomear e recriar
+                if os.path.exists(arquivo):
+                    backup = arquivo.replace('.csv', '_backup_erro.csv')
+                    os.rename(arquivo, backup)
+                    print(f"Arquivo problemático renomeado para {backup}.")
+                pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
+
+    def Coletar_dados(self, dados_sensores):
+        """
+        Coleta dados dos sensores e armazena em arquivos CSV.
+        Só executa se o Slider_dados for igual a 1.
+        """
+        print(f"Coletar_dados chamado. Slider value: {self.coleta_dados.value()}")  # Debug
+
+        if self.coleta_dados.value() == 0:
+            print("Coleta desabilitada (slider=0).")
+            return
+
+        print("Coleta habilitada, processando dados...")
+
+        try:
+            # Processa data/hora
+            data_hora_str = dados_sensores.get('Data/Hora', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            try:
+                data, hora = data_hora_str.split(' ')
+            except ValueError:
+                data = data_hora_str
+                hora = "00:00:00"
+
+            # Prepara dicionário com todos os campos (na ordem das colunas)
+            linha = {
+                'Data': data,
+                'Hora': hora,
+                'xD': dados_sensores.get('xD', 0.0),
+                'xB': dados_sensores.get('xB', 0.0),
+                'MB': dados_sensores.get('MB', 0.0),
+                'MD': dados_sensores.get('MD', 0.0),
+                'VD': dados_sensores.get('VD', 0.0),
+                'VL': dados_sensores.get('VL', 0.0),
+                'VF': dados_sensores.get('VF', 0.0),
+                'VB': dados_sensores.get('VB', 0.0),
+                'RB': dados_sensores.get('RB', 0.0),
+                'R1': dados_sensores.get('R1', 0.0),
+                'R2': dados_sensores.get('R2', 0.0),
+                'TA': dados_sensores.get('TA', 0.0),
+            }
+
+            # Temperaturas dos pratos
+            temperaturas = dados_sensores.get('T_prato', [0.0]*14)
+            for i in range(14):
+                linha[f'T{i+1}'] = temperaturas[i]
+
+            # Cria DataFrame com uma única linha
+            df_linha = pd.DataFrame([linha])
+
+            # Salva no arquivo "atual" (sobrescreve)
+            #df_linha.to_csv('SensorAtuadorAtual.csv', index=False)
+            #print("Arquivo SensorAtuadorAtual.csv atualizado.")
+
+            # Salva no histórico em modo append (sem cabeçalho)
+            df_linha.to_csv('SensorAtuadorHist.csv', mode='a', header=False, index=False)
+            print("Dados adicionados ao SensorAtuadorHist.csv")
+
+            print(f"Dados salvos - xD: {dados_sensores.get('xD', 0.0):.2f}")
+
+        except Exception as e:
+            print(f"Erro ao coletar dados: {e}")
+            traceback.print_exc()  # Mostra o stack trace completo
+
 def main():
     app = QApplication(sys.argv)
     supervisor = SupervisaoGeralApp()
-    sensores = Sensores()
+    Dados_supervisor = SupervisaoDadosApp()
+    supervisor.dados_window = Dados_supervisor 
+    sensores = Sensores(ui_principal=supervisor.ui)
     
     # Buscar elementos da UI
     def encontrar_elementos():
@@ -214,12 +338,6 @@ def main():
             'lcd_xB': supervisor.lcd_xB,
             'lcd_MB': supervisor.lcd_MB,
             'lcd_MD': supervisor.lcd_MD,
-            #'lcd_VL': supervisor.lcd_VL,
-            #'lcd_VD': supervisor.lcd_VD,
-            #'lcd_RB': supervisor.lcd_RB,
-            #'dial_ctr_VL': supervisor.dial_ctr_VL,
-            #'dial_ctr_VD': supervisor.dial_ctr_VD,
-            #'dial_RB': supervisor.dial_RB
         }
         
         for elem_name, element in element_mapping.items():
@@ -244,9 +362,6 @@ def main():
                 'lcd_xB': dados['xB'],
                 'lcd_MB': dados['MB'],
                 'lcd_MD': dados['MD'],
-                #'lcd_VL': dados['VL'],
-                #'lcd_VD': dados['VD'],
-                #'lcd_RB': dados['RB']
             }
             
             for elem_name, value in lcd_mapping.items():
@@ -255,26 +370,13 @@ def main():
                         elementos_ui[elem_name].display(float(value))
                     except Exception as e:
                         print(f"Erro ao atualizar {elem_name}: {e}")
-            
-            # Atualizar Dials (apenas valores inteiros)
-            #dial_mapping = {
-            #    'dial_ctr_VL': int(dados['VL']),
-            #    'dial_ctr_VD': int(dados['VD']),
-            #    'dial_RB': int(dados['RB'])
-            #}
-            
-            #for elem_name, value in dial_mapping.items():
-            #    if elem_name in elementos_ui:
-            #        try:
-            #            elementos_ui[elem_name].blockSignals(True)
-            #            elementos_ui[elem_name].setValue(value)
-            #            elementos_ui[elem_name].blockSignals(False)
-            #        except Exception as e:
-            #            print(f"Erro ao atualizar {elem_name}: {e}")
-            
+         
             # Atualizar gráficos
             supervisor.atualizar_grafico_temperaturas(dados['T_prato'])
             supervisor.atualizar_grafico_xD(dados['xD'])
+            
+            # Coletar dados se o slider estiver habilitado (= 1)
+            Dados_supervisor.Coletar_dados(dados)
                         
         except Exception as e:
             print(f"Erro geral ao atualizar UI: {e}")
@@ -284,7 +386,7 @@ def main():
     
     def parar_sensores():
         print("Parando sensores...")
-        sensores.parar_leitura()
+        sensores.parar_leitura_escrita()
     
     # Registrar para executar quando o programa terminar
     atexit.register(parar_sensores)
@@ -298,10 +400,10 @@ def main():
     supervisor.closeEvent = closeEvent
     
     # Iniciar sensores
-    sensores.iniciar_leitura()
+    sensores.iniciar_leitura_escrita()
     print("Sensores iniciados. Feche a janela para parar.")
-    
-    supervisor.show()
+    print(f"Coleta de dados: {Dados_supervisor.coleta_dados.value()}")
+    supervisor.showMaximized()  # Inicia em tela cheia
     result = app.exec()
     
     # Garantir parada final
@@ -309,6 +411,8 @@ def main():
     print("Aplicação encerrada.")
     
     sys.exit(result)
+
+
 
 if __name__ == "__main__":
     main()

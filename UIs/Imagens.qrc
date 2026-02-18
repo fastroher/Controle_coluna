@@ -1,7 +1,5 @@
 <RCC>
   <qresource prefix="Imagens">
-    <file>Imagens/Coluna destilação v5.jpg</file>
     <file>Imagens/Coluna destilação v5.png</file>
-    <file>Imagens/peq.png</file>
   </qresource>
 </RCC>
