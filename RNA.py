@@ -1,4 +1,5 @@
 import torch
+<<<<<<< HEAD
 from torch import nn
 import pandas as pd
 from RNA_Supervisorio_ui import Ui_RNA
@@ -40,3 +41,8 @@ class RNA_Transformer(nn.Module):
         transformer_out = self.transformer(x)
         output = self.fc(transformer_out[:, -1])
         return output
+=======
+import pandas as pd
+a=torch.cuda.is_available()
+print(a)
+>>>>>>> f437735675c5c304043293031df7ba32a34c17f6
