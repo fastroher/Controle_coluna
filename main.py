@@ -180,7 +180,8 @@ class SupervisaoGeralApp(QMainWindow):
 
             # Adicionar rótulo do último valor
             label = QGraphicsSimpleTextItem(f"{temp:.2f}")
-            pos = self.chart_T.mapToPosition(self.series_T[i].pointsVector()[-1], self.series_T[i])
+            ultimo_ponto = self.series_T[i].at(self.series_T[i].count() - 1)
+            pos = self.chart_T.mapToPosition(ultimo_ponto, self.series_T[i])
             label.setPos(pos.x(), pos.y() - 20)  # Ajuste vertical
             self.chart_T.scene().addItem(label)
             setattr(self, f'label_T_{i}', label)
@@ -202,7 +203,8 @@ class SupervisaoGeralApp(QMainWindow):
 
         # Adicionar rótulo do último valor
         label = QGraphicsSimpleTextItem(f"{xD:.2f}")
-        pos = self.chart_xD.mapToPosition(self.series_xD.pointsVector()[-1], self.series_xD)
+        ultimo_ponto = self.series_xD.at(self.series_xD.count() - 1)
+        pos = self.chart_xD.mapToPosition(ultimo_ponto, self.series_xD)
         label.setPos(pos.x(), pos.y() - 20)
         self.chart_xD.scene().addItem(label)
         self.label_xD = label
@@ -235,7 +237,6 @@ class SupervisaoDadosApp(QMainWindow):
         
         if not os.path.exists(arquivo):           
             pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)  # Cria arquivo vazio apenas com cabeçalho
-            print(f"Arquivo {arquivo} criado com cabeçalho.")
 
         else:
             df = pd.read_csv(arquivo)                
@@ -243,15 +244,13 @@ class SupervisaoDadosApp(QMainWindow):
 
             # Verifica se as colunas necessárias estão presentes e na ordem correta
             if list(df.columns) == self.colunas:
-                    print("Arquivo histórico já está no formato correto.")
+                    pass
 
             # Se não estiver correto, faz backup e recria
             else:
                 backup = arquivo.replace('.csv', '_backup.csv')
                 os.rename(arquivo, backup)
-                print(f"Arquivo histórico corrompido. Backup salvo como {backup}. Recriando...")
                 pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
-                print(f"Arquivo {arquivo} recriado com cabeçalho.")
 
     #Coleta dados dos sensores e armazena em arquivos CSV, só executa se o Slider_dados for igual a 1
     def Coletar_dados(self, dados_sensores):
@@ -290,7 +289,6 @@ class SupervisaoDadosApp(QMainWindow):
 
         # Salva no histórico em modo append (sem cabeçalho)
         df_linha.to_csv('SensorAtuadorHist.csv', mode='a', header=False, index=False)   #mode 'a' para append
-        traceback.print_exc()  # Mostra o stack trace completo
 
 def main():
     app = QApplication(sys.argv)

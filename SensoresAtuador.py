@@ -1,13 +1,12 @@
 import random
 import datetime
-
 from threading import Thread, Event
 from PySide6.QtCore import QObject, Signal
 
 class Sensores(QObject):
 
     # Sinais para atualizar a UI
-    dados_atualizados = Signal(dict)            # Sinal para enviar os dados dos sensores para a UI
+    dados_atualizados = Signal(dict)       
     
     def __init__(self,ui_principal=None):
         super().__init__()
@@ -27,8 +26,8 @@ class Sensores(QObject):
         self._stop_event = Event()
         self.thread = None                                      # Thread para leitura dos sensores.
     
+    #Inicia a thread de leitura dos sensores
     def iniciar_leitura_escrita(self):
-        #Inicia a thread de leitura dos sensores
         if self.thread and self.thread.is_alive():              #Verifica se não há um thread já rodando para evitar múltiplas threads
             return
             
@@ -36,25 +35,18 @@ class Sensores(QObject):
         self.thread = Thread(target=self._ler_sensores_atuadores)         #Cria a thread para ler os sensores
         self.thread.daemon = True                               #Define como daemon para que a thread seja encerrada quando o programa fechar  
         self.thread.start()                                     #Inicia a thread
-        print("Thread de sensores iniciada")
     
-    def parar_leitura_escrita(self):
-
-        #Para a thread de leitura dos sensores
+    #Para a thread de leitura dos sensores
+    def parar_leitura_escrita(self):        
         self._stop_event.set()                      #Sinaliza para a thread parar
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=2.0)           #Aguarda a thread terminar, com timeout para evitar bloqueio indefinido
-            print("Thread de sensores parada")
     
+    #Loop principal de leitura dos sensores e atualização dos atuadores
     def _ler_sensores_atuadores(self):
-
-        #Loop principal de leitura dos sensores 
-        print("Iniciando leitura de sensores...")
-        
         while not self._stop_event.is_set():
 
-            #Dados de data de hora
-            
+            #Dados de data de hora atualizados a cada leitura para exibição na UI   
             self.data_hora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             # Gerar novos valores aleatórios
@@ -73,7 +65,7 @@ class Sensores(QObject):
             self.R1 = 1.0 if self.ui_principal.button_R1.isChecked() else 0.0
             self.R2 = 1.0 if self.ui_principal.button_R2.isChecked() else 0.0
                            
-                # Emitir sinal com os dados atualizados
+            # Emitir sinal com os dados atualizados
             dados = {
                     'Data/Hora': self.data_hora,
                     'xB': self.xB * 100,  # Converter para porcentagem para display
@@ -91,8 +83,4 @@ class Sensores(QObject):
                     'R2': self.R2                  
                 }
             self.dados_atualizados.emit(dados)
-                
-                # Aguardar com possibilidade de interrupção
             self._stop_event.wait(1.0)  # Aguarda 1 segundo ou até ser interrompido
-        
-        print("Leitura de sensores finalizada")
