@@ -16,6 +16,7 @@ import pandas as pd
 from datetime import datetime
 import os
 import traceback
+import sqlite3
 
 #classe relacionada a tela geral do supervisório
 class SupervisaoGeralApp(QMainWindow):
@@ -220,76 +221,80 @@ class SupervisaoDadosApp(QMainWindow):
         self.ui_Dados = Ui_Dados()
         self.ui_Dados.setupUi(self)
         self.coleta_dados = self.ui_Dados.Slider_dados
-
-        # Colunas do arquivo histórico (CSV)
-        self.colunas = [
-            'Data', 'Hora', 'xD', 'xB', 'MB', 'MD', 'VD', 'VL', 'VF',
-            'VB', 'RB', 'R1', 'R2', 'TA', 'T1', 'T2', 'T3', 'T4', 'T5',
-            'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14'
-        ]
-
-        
-        self.inicializar_arquivo_historico()
-
-    # Inicializa o arquivo histórico
-    def inicializar_arquivo_historico(self):
-        arquivo = 'SensorAtuadorHist.csv'
-        
-        if not os.path.exists(arquivo):           
-            pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)  # Cria arquivo vazio apenas com cabeçalho
-
-        else:
-            df = pd.read_csv(arquivo)                
-            df.columns = df.columns.str.strip()     # Remove espaços dos nomes das colunas
-
-            # Verifica se as colunas necessárias estão presentes e na ordem correta
-            if list(df.columns) == self.colunas:
-                    pass
-
-            # Se não estiver correto, faz backup e recria
-            else:
-                backup = arquivo.replace('.csv', '_backup.csv')
-                os.rename(arquivo, backup)
-                pd.DataFrame(columns=self.colunas).to_csv(arquivo, index=False)
-
+        self.banco = sqlite3.connect('Sensores_Atuadores.db')
+        self.cursor = self.banco.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Historico (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            Data TEXT,
+                            Hora TEXT,
+                            xD REAL,
+                            xB REAL,
+                            MB REAL,
+                            MD REAL,
+                            VD REAL,
+                            VL REAL,
+                            VF REAL,
+                            VB REAL,
+                            RB REAL,
+                            R1 REAL,
+                            R2 REAL,
+                            TA REAL,
+                            T1 REAL,
+                            T2 REAL,
+                            T3 REAL,
+                            T4 REAL,
+                            T5 REAL,
+                            T6 REAL,
+                            T7 REAL,
+                            T8 REAL,
+                            T9 REAL,
+                            T10 REAL,
+                            T11 REAL,
+                            T12 REAL,
+                            T13 REAL,
+                            T14 REAL
+                        )''')
+ 
     #Coleta dados dos sensores e armazena em arquivos CSV, só executa se o Slider_dados for igual a 1
     def Coletar_dados(self, dados_sensores):
-      
         if self.coleta_dados.value() == 0:
             return
 
         data_hora_str = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        data, hora = data_hora_str.split(' ')                 #divide em duas colonas (considerando espaoço entre a variável)
+        data, hora = data_hora_str.split(' ')
 
-            # Prepara dicionário com todos os campos (na ordem das colunas)
-        linha = {
-                'Data': data,
-                'Hora': hora,
-                'xD': dados_sensores.get('xD'),
-                'xB': dados_sensores.get('xB'),
-                'MB': dados_sensores.get('MB'),
-                'MD': dados_sensores.get('MD'),
-                'VD': dados_sensores.get('VD'),
-                'VL': dados_sensores.get('VL'),
-                'VF': dados_sensores.get('VF'),
-                'VB': dados_sensores.get('VB'),
-                'RB': dados_sensores.get('RB'),
-                'R1': dados_sensores.get('R1'),
-                'R2': dados_sensores.get('R2'),
-                'TA': dados_sensores.get('TA'),
-            }
-
-        # Temperaturas dos pratos
+        # Prepara lista com todos os valores (na ordem das colunas da tabela)
+        valores = [
+            data,
+            hora,
+            dados_sensores.get('xD'),
+            dados_sensores.get('xB'),
+            dados_sensores.get('MB'),
+            dados_sensores.get('MD'),
+            dados_sensores.get('VD'),
+            dados_sensores.get('VL'),
+            dados_sensores.get('VF'),
+            dados_sensores.get('VB'),
+            dados_sensores.get('RB'),
+            dados_sensores.get('R1'),
+            dados_sensores.get('R2'),
+            dados_sensores.get('TA')
+    ]
+        # Adiciona as temperaturas (T1 a T14)
         temperaturas = dados_sensores.get('T_prato', [0.0]*14)
-        for i in range(14):
-                linha[f'T{i+1}'] = temperaturas[i]
+        valores.extend(temperaturas)  # Agora valores tem 28 itens
 
-        # Cria DataFrame com uma única linha
-        df_linha = pd.DataFrame([linha])
+        # Monta a string com os placeholders (28 "?")
+        placeholders = ','.join(['?'] * 28)
 
-        # Salva no histórico em modo append (sem cabeçalho)
-        df_linha.to_csv('SensorAtuadorHist.csv', mode='a', header=False, index=False)   #mode 'a' para append
+        sql = f'''INSERT INTO Historico (
+                    Data, Hora, xD, xB, MB, MD, VD, VL, VF, VB, RB, R1, R2, TA,
+                    T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
+                ) VALUES ({placeholders})'''
 
+        self.cursor.execute(sql, valores)
+        self.banco.commit()  # Confirma a inserção
+   
 def main():
     app = QApplication(sys.argv)
     supervisor = SupervisaoGeralApp()
